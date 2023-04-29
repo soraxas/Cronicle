@@ -16,8 +16,8 @@ var base_dir = '/opt/cronicle';
 var log_dir = base_dir + '/logs';
 var log_file = '';
 var gh_repo_url = 'http://github.com/jhuckaby/Cronicle';
-var gh_releases_url = 'https://api.github.com/repos/jhuckaby/Cronicle/releases';
-var gh_head_tarball_url = 'https://github.com/jhuckaby/Cronicle/archive/master.tar.gz';
+//var gh_releases_url = 'https://api.github.com/repos/jhuckaby/Cronicle/releases';
+//var gh_head_tarball_url = 'https://github.com/jhuckaby/Cronicle/archive/master.tar.gz';
 
 // don't allow npm to delete these (ugh)
 var packages_to_check = ['couchbase', 'aws-sdk', 'redis'];
@@ -99,62 +99,7 @@ if (is_preinstalled) {
 	catch (err) {;}
 }
 
-print( "Fetching release list...\n");
-logonly( "Releases URL: " + gh_releases_url + "\n" );
 
-cp.exec('curl -s ' + gh_releases_url, function (err, stdout, stderr) {
-	if (err) {
-		print( stdout.toString() );
-		warn( stderr.toString() );
-		die("Failed to fetch release list: " + gh_releases_url + ": " + err);
-	}
-	
-	var releases = null;
-	try { releases = JSON.parse( stdout.toString() ); }
-	catch (err) {
-		die("Failed to parse JSON from GitHub: " + gh_releases_url + ": " + err);
-	}
-	
-	// util.isArray is DEPRECATED??? Nooooooooode!
-	var isArray = Array.isArray || util.isArray;
-	if (!isArray(releases)) die("Unexpected response from GitHub Releases API: " + gh_releases_url + ": Not an array");
-	
-	var release = null;
-	for (var idx = 0, len = releases.length; idx < len; idx++) {
-		var rel = releases[idx];
-		var ver = rel.tag_name.replace(/^\D+/, '');
-		rel.version = ver;
-		
-		if (!new_version || (ver == new_version)) { 
-			release = rel; 
-			new_version = ver; 
-			idx = len; 
-		}
-	} // foreach release
-	
-	if (!release) {
-		// no release found -- use HEAD rev?
-		if (!new_version || new_version.match(/HEAD/i)) {
-			release = {
-				version: 'HEAD',
-				tarball_url: gh_head_tarball_url
-			};
-		}
-		else {
-			die("Release not found: " + new_version);
-		}
-	}
-	
-	// sanity check
-	if (is_preinstalled && (cur_version == new_version)) {
-		if (process.argv[2]) print( "\nVersion " + cur_version + " is already installed.\n\n" );
-		else print( "\nVersion " + cur_version + " is already installed, and is the latest.\n\n" );
-		process.exit(0);
-	}
-	
-	// proceed with installation
-	if (is_preinstalled) print("Upgrading Cronicle from v"+cur_version+" to v"+new_version+"...\n");
-	else print("Installing Cronicle v"+new_version+"...\n");
 	
 	if (is_running) {
 		print("\n");
@@ -162,20 +107,11 @@ cp.exec('curl -s ' + gh_releases_url, function (err, stdout, stderr) {
 		catch (err) { die("Failed to stop Cronicle: " + err); }
 		print("\n");
 	}
+
+
+
+
 	
-	// download tarball and expand into current directory
-	var tarball_url = release.tarball_url;
-	logonly( "Tarball URL: " + tarball_url + "\n" );
-	
-	cp.exec('curl -L ' + tarball_url + ' | tar zxf - --strip-components 1', function (err, stdout, stderr) {
-		if (err) {
-			print( stdout.toString() );
-			warn( stderr.toString() );
-			die("Failed to download release: " + tarball_url + ": " + err);
-		}
-		else {
-			logonly( stdout.toString() + stderr.toString() );
-		}
 		
 		try {
 			var stats = fs.statSync( base_dir + '/package.json' );
@@ -251,5 +187,3 @@ cp.exec('curl -s ' + gh_releases_url, function (err, stdout, stderr) {
 				process.exit(0);
 			} ); // build.js
 		} ); // npm
-	} ); // download
-} ); // releases api
