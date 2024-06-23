@@ -1,5 +1,5 @@
 // Cronicle Auto Installer
-// Copyright (c) 2015 - 2019 Joseph Huckaby, MIT License.
+// Copyright (c) 2015 - 2023 Joseph Huckaby, MIT License.
 // https://github.com/jhuckaby/Cronicle
 
 // To install, issue this command as root:
@@ -11,7 +11,7 @@ var util = require('util');
 var os = require('os');
 var cp = require('child_process');
 
-var installer_version = '1.3';
+var installer_version = '1.4';
 var base_dir = '/opt/cronicle';
 var log_dir = base_dir + '/logs';
 var log_file = '';
@@ -20,15 +20,18 @@ var gh_repo_url = 'http://github.com/jhuckaby/Cronicle';
 //var gh_head_tarball_url = 'https://github.com/jhuckaby/Cronicle/archive/master.tar.gz';
 
 // don't allow npm to delete these (ugh)
-var packages_to_check = ['couchbase', 'aws-sdk', 'redis'];
+var packages_to_check = ['couchbase', 'redis', 'ioredis', 'ioredis-timeout', 'sqlite3'];
 var packages_to_rescue = {};
 
 var restore_packages = function() {
 	// restore packages that npm killed during upgrade
 	var cmd = "npm install";
+	var num_found = 0;
 	for (var pkg in packages_to_rescue) {
 		cmd += ' ' + pkg + '@' + packages_to_rescue[pkg];
+		num_found++;
 	}
+	if (!num_found) return; // nothing to restore
 	if (log_file) {
 		fs.appendFileSync(log_file, "\nExecuting npm command to restore lost packages: " + cmd + "\n");
 		cmd += ' >>' + log_file + ' 2>&1';
@@ -69,7 +72,7 @@ logonly( "\nStarting install run: " + (new Date()).toString() + "\n" );
 
 print( 
 	"\nCronicle Installer v" + installer_version + "\n" + 
-	"Copyright (c) 2015 - 2018 PixlCore.com. MIT Licensed.\n" + 
+	"Copyright (c) 2015 - 2022 PixlCore.com. MIT Licensed.\n" + 
 	"Log File: " + log_file + "\n\n" 
 );
 

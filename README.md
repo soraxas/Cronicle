@@ -20,175 +20,19 @@
 * Simple REST API for scheduling and running events.
 * API Keys for authenticating remote apps.
 
-## Table of Contents
+## Documentation
 
-<details><summary>Table of Contents</summary>
+The Cronicle documentation is split up across these files:
 
-<!-- toc -->
-* [Glossary](#glossary)
-- [Installation](#installation)
-- [Setup](#setup)
-	* [Single Server](#single-server)
-	* [Single Primary with Workers](#single-primary-with-workers)
-	* [Multi-Server Cluster](#multi-server-cluster)
-		+ [Load Balancers](#load-balancers)
-		+ [Ops Notes](#ops-notes)
-- [Configuration](#configuration)
-	* [Basics](#basics)
-		+ [base_app_url](#base_app_url)
-		+ [email_from](#email_from)
-		+ [smtp_hostname](#smtp_hostname)
-		+ [smtp_port](#smtp_port)
-		+ [mail_options](#mail_options)
-		+ [secret_key](#secret_key)
-		+ [log_dir](#log_dir)
-		+ [log_filename](#log_filename)
-		+ [log_columns](#log_columns)
-		+ [log_archive_path](#log_archive_path)
-		+ [copy_job_logs_to](#copy_job_logs_to)
-		+ [queue_dir](#queue_dir)
-		+ [pid_file](#pid_file)
-		+ [debug_level](#debug_level)
-		+ [maintenance](#maintenance)
-		+ [list_row_max](#list_row_max)
-		+ [job_data_expire_days](#job_data_expire_days)
-		+ [child_kill_timeout](#child_kill_timeout)
-		+ [dead_job_timeout](#dead_job_timeout)
-		+ [master_ping_freq](#master_ping_freq)
-		+ [master_ping_timeout](#master_ping_timeout)
-		+ [udp_broadcast_port](#udp_broadcast_port)
-		+ [scheduler_startup_grace](#scheduler_startup_grace)
-		+ [universal_web_hook](#universal_web_hook)
-		+ [web_hook_custom_data](#web_hook_custom_data)
-		+ [web_hook_custom_opts](#web_hook_custom_opts)
-		+ [web_hook_text_templates](#web_hook_text_templates)
-		+ [ssl_cert_bypass](#ssl_cert_bypass)
-		+ [job_memory_max](#job_memory_max)
-		+ [job_memory_sustain](#job_memory_sustain)
-		+ [job_cpu_max](#job_cpu_max)
-		+ [job_cpu_sustain](#job_cpu_sustain)
-		+ [job_log_max_size](#job_log_max_size)
-		+ [job_env](#job_env)
-		+ [server_comm_use_hostnames](#server_comm_use_hostnames)
-		+ [web_direct_connect](#web_direct_connect)
-		+ [web_socket_use_hostnames](#web_socket_use_hostnames)
-		+ [socket_io_transports](#socket_io_transports)
-	* [Storage Configuration](#storage-configuration)
-		+ [Filesystem](#filesystem)
-		+ [Couchbase](#couchbase)
-		+ [Amazon S3](#amazon-s3)
-	* [Web Server Configuration](#web-server-configuration)
-	* [User Configuration](#user-configuration)
-	* [Email Configuration](#email-configuration)
-- [Web UI](#web-ui)
-	* [Home Tab](#home-tab)
-		+ [General Stats](#general-stats)
-		+ [Active Jobs](#active-jobs)
-		+ [Upcoming Events](#upcoming-events)
-	* [Schedule Tab](#schedule-tab)
-		+ [Edit Event Tab](#edit-event-tab)
-			- [Event ID](#event-id)
-			- [Event Name](#event-name)
-			- [Event Enabled](#event-enabled)
-			- [Event Category](#event-category)
-			- [Event Target](#event-target)
-				* [Algorithm](#algorithm)
-				* [Multiplexing](#multiplexing)
-			- [Event Plugin](#event-plugin)
-			- [Event Timing](#event-timing)
-			- [Event Concurrency](#event-concurrency)
-			- [Event Timeout](#event-timeout)
-			- [Event Retries](#event-retries)
-			- [Event Options](#event-options)
-				* [Run All Mode](#run-all-mode)
-				* [Detached Mode](#detached-mode)
-				* [Allow Queued Jobs](#allow-queued-jobs)
-				* [Chain Reaction](#chain-reaction)
-			- [Event Time Machine](#event-time-machine)
-			- [Event Notification](#event-notification)
-				* [Event Web Hook](#event-web-hook)
-			- [Event Resource Limits](#event-resource-limits)
-			- [Event Notes](#event-notes)
-			- [Run Now](#run-now)
-	* [Completed Jobs Tab](#completed-jobs-tab)
-		+ [Event History Tab](#event-history-tab)
-		+ [Event Stats Tab](#event-stats-tab)
-	* [Job Details Tab](#job-details-tab)
-	* [My Account Tab](#my-account-tab)
-	* [Administration Tab](#administration-tab)
-		+ [Activity Log Tab](#activity-log-tab)
-		+ [API Keys Tab](#api-keys-tab)
-		+ [Categories Tab](#categories-tab)
-		+ [Plugins Tab](#plugins-tab)
-			- [Plugin Parameters](#plugin-parameters)
-			- [Advanced Plugin Options](#advanced-plugin-options)
-		+ [Servers Tab](#servers-tab)
-			- [Server Groups](#server-groups)
-		+ [Users Tab](#users-tab)
-- [Plugins](#plugins)
-	* [Writing Plugins](#writing-plugins)
-		+ [JSON Input](#json-input)
-		+ [JSON Output](#json-output)
-			- [Reporting Progress](#reporting-progress)
-			- [Performance Metrics](#performance-metrics)
-				* [Nested Metrics](#nested-metrics)
-			- [Changing Notification Settings](#changing-notification-settings)
-			- [Chain Reaction Control](#chain-reaction-control)
-				* [Chain Data](#chain-data)
-			- [Custom Data Tables](#custom-data-tables)
-			- [Custom HTML Content](#custom-html-content)
-			- [Updating The Event](#updating-the-event)
-		+ [Job Environment Variables](#job-environment-variables)
-	* [Sample Node Plugin](#sample-node-plugin)
-	* [Sample Perl Plugin](#sample-perl-plugin)
-	* [Sample PHP Plugin](#sample-php-plugin)
-	* [Built-in Shell Plugin](#built-in-shell-plugin)
-	* [Built-in HTTP Request Plugin](#built-in-http-request-plugin)
-		+ [HTTP Request Chaining](#http-request-chaining)
-- [Command Line](#command-line)
-	* [Starting and Stopping](#starting-and-stopping)
-	* [Environment Variables](#environment-variables)
-	* [Storage Maintenance](#storage-maintenance)
-	* [Recover Admin Access](#recover-admin-access)
-	* [Server Startup](#server-startup)
-	* [Upgrading Cronicle](#upgrading-cronicle)
-	* [Data Import and Export](#data-import-and-export)
-	* [Storage Migration Tool](#storage-migration-tool)
-- [Inner Workings](#inner-workings)
-	* [Cron Noncompliance](#cron-noncompliance)
-	* [Storage](#storage)
-	* [Logs](#logs)
-	* [Keeping Time](#keeping-time)
-	* [Primary Server Failover](#primary-server-failover)
-		+ [Unclean Shutdown](#unclean-shutdown)
-- [API Reference](#api-reference)
-	* [JSON REST API](#json-rest-api)
-		+ [Redirects](#redirects)
-	* [API Keys](#api-keys)
-	* [Standard Response Format](#standard-response-format)
-	* [API Calls](#api-calls)
-		+ [get_schedule](#get_schedule)
-		+ [get_event](#get_event)
-		+ [create_event](#create_event)
-		+ [update_event](#update_event)
-		+ [delete_event](#delete_event)
-		+ [run_event](#run_event)
-		+ [get_job_status](#get_job_status)
-		+ [get_active_jobs](#get_active_jobs)
-		+ [update_job](#update_job)
-		+ [abort_job](#abort_job)
-	* [Event Data Format](#event-data-format)
-		+ [Event Timing Object](#event-timing-object)
-- [Development](#development)
-	* [Installing Dev Tools](#installing-dev-tools)
-	* [Manual Installation](#manual-installation)
-	* [Starting in Debug Mode](#starting-in-debug-mode)
-	* [Running Unit Tests](#running-unit-tests)
-- [Companies Using Cronicle](#companies-using-cronicle)
-- [Colophon](#colophon)
-- [License](#license)
-
-</details>
+- &rarr; **[Installation & Setup](https://github.com/jhuckaby/Cronicle/blob/master/docs/Setup.md)**
+- &rarr; **[Configuration](https://github.com/jhuckaby/Cronicle/blob/master/docs/Configuration.md)**
+- &rarr; **[Setup](https://github.com/jhuckaby/Cronicle/blob/master/docs/Setup.md)**
+- &rarr; **[Web UI](https://github.com/jhuckaby/Cronicle/blob/master/docs/WebUI.md)**
+- &rarr; **[Plugins](https://github.com/jhuckaby/Cronicle/blob/master/docs/Plugins.md)**
+- &rarr; **[Command Line](https://github.com/jhuckaby/Cronicle/blob/master/docs/CommandLine.md)**
+- &rarr; **[Inner Workings](https://github.com/jhuckaby/Cronicle/blob/master/docs/InnerWorkings.md)**
+- &rarr; **[API Reference](https://github.com/jhuckaby/Cronicle/blob/master/docs/APIReference.md)**
+- &rarr; **[Development](https://github.com/jhuckaby/Cronicle/blob/master/docs/Development.md)**
 
 ## Glossary
 
@@ -3436,9 +3280,7 @@ Cronicle is known to be in use by the following companies:
 - [Sling TV](https://sling.com)
 # Colophon
 
-We stand on the shoulders of giants.  Cronicle was inspired by a PHP application called **Ubercron**, which was designed and programmed by [Larry Azlin](http://azlin.com/).  Cheers Larry!
-
-Cronicle was built using these awesome Node modules:
+We stand on the shoulders of giants.  Cronicle was built using these awesome Node modules:
 
 | Module Name | Description | License |
 |-------------|-------------|---------|
@@ -3466,11 +3308,18 @@ Cronicle was built using these awesome Node modules:
 | [uglify-js](https://www.npmjs.com/package/uglify-js) | JavaScript parser, mangler/compressor and beautifier toolkit. | BSD-2-Clause |
 | [zxcvbn](https://www.npmjs.com/package/zxcvbn) | Realistic password strength estimation, from Dropbox. | MIT |
 
+## Companies Using Cronicle
+
+Cronicle is known to be in use by the following companies:
+
+- [Agnes & Dora](https://agnesanddora.com)
+- [Sling TV](https://sling.com)
+
 # License
 
-The MIT License (MIT)
+**The MIT License (MIT)**
 
-Copyright (c) 2015 - 2018 Joseph Huckaby
+*Copyright (c) 2015 - 2023 Joseph Huckaby*
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
